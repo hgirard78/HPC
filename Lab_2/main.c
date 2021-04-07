@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+void gen_rand(double *array, size_t size, int min, int max)
+{
+
+    double r;
+    for (size_t i = 0; i < size; i++)
+    {
+        r = (double) rand() / ((double) RAND_MAX + 1);
+        r = r * (max - min) + min;
+        *(array + i) = r;
+    }
+}
+
+int main(void)
+{
+
+    srand(time(NULL));
+    size_t nb_row, nb_col, i, j;
+    int k;
+    double *diagonal_value, *other_values;
+    printf("Enter the desired matrix row numbers: ");
+    scanf("%lu", &nb_row);
+    printf("Enter the desired matrix column numbers: ");
+    scanf("%lu", &nb_col);
+    printf("matrix size: %lux%lu\n", nb_row, nb_col);
+    printf("How much non-zero elements in each row? ");
+    scanf("%d", &k);
+
+    if (nb_row < nb_col)
+        diagonal_value = malloc(nb_row * sizeof(double));
+
+    else
+        diagonal_value = malloc(nb_col * sizeof(double));
+
+    other_values = malloc((nb_row * nb_col) * sizeof(double));
+
+    gen_rand(diagonal_value, nb_row, 1, 2);
+    gen_rand(other_values, nb_row * nb_col, 0, 1);
+
+    double array[nb_row][nb_col];
+    for (i = 0; i < nb_row; i++)
+    {
+        for (j = 0; j < nb_col; j++)
+        {
+            array[i][j] = 0;
+        }
+    }
+    int diago = 0;
+    int other = 0;
+    int nb_zero = nb_row - k - 1;
+    for (i = 0; i < nb_row; i++)
+    {
+        int count_zero = 0;
+        int k2 = k;
+        for (j = 0; j < nb_col; j++)
+        {  
+            if (i == j)
+            {
+                array[i][j] = diagonal_value[diago];
+                diago++;
+            }
+            else
+            {   
+                int zero = rand() % 2;
+                if (k2 > 0 && zero == 0)
+                {
+                    array[i][j] = 5;
+                    array[i][j] = other_values[other];
+                    other++;
+                    k2--;
+                }
+                else if (count_zero + 1 != nb_zero)
+                {
+                    array[i][j] = 0;
+                    count_zero++;
+                }
+                else if (k2 > 0)
+                {
+                    array[i][j] = 5;
+                    array[i][j] = other_values[other];
+                    other++;
+                    k2--;
+                }
+                else
+                {
+                    array[i][j] = 0;
+                }
+            }
+
+        }
+    }
+    for (i = 0; i < nb_row; i++)
+    {
+        for (j = 0; j < nb_col; j++)
+        {
+            printf("array[%ld][%ld] = %lf ", i, j, array[i][j]);
+        }
+        printf("\n");
+    }
+    double val[nb_col * nb_row];
+    int col_ind[nb_col * nb_row];
+    int raw_ptr[nb_row + 1];
+    int new_line = 0;
+    size_t size_ptr = 0;
+    size_t size_val = 0;
+    size_t size_col = 0;
+    for (i = 0; i < nb_row; i++)
+    {
+        new_line = 1;
+        for (j = 0; j < nb_col; j++)
+        {
+
+            if (array[i][j] != 0)
+            {
+                val[size_val] = array[i][j];
+                if (new_line)
+                {
+                    raw_ptr[size_ptr] = size_val;
+                    size_ptr++;
+                    new_line = 0;
+                }
+                size_val++;
+                col_ind[size_col] = j;
+                size_col++;
+            }
+        }
+    }
+    raw_ptr[size_ptr] = size_val;
+    size_ptr++;
+    printf("raw_ptr: ");
+    for (i = 0; i < size_ptr; i++)
+    {
+        printf("| %d ", raw_ptr[i]);
+    }
+    printf("\nval: ");
+    for (i = 0; i < size_val; i++)
+    {
+        printf("| %lf ", val[i]);
+    }
+    printf("\ncol_ind: ");
+    for (i = 0; i < size_col; i++)
+    {
+        printf("| %d ", col_ind[i]);
+    }
+    return 0;
+}
