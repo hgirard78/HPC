@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 
 void gen_rand(double *vector, size_t size, int min, int max)
 {
@@ -228,5 +229,6 @@ int main(void)
     matrix_vector_product(result, x, val, col_ind, raw_ptr, nb_row);
     test_product(array, result, x, nb_row, nb_col);
     free_all(array, result, val, raw_ptr, col_ind, x, nb_row);
+    sleep(10000);
     return 0;
 }
