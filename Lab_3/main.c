@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <err.h>
 
 void gen_rand(double *vector, size_t size, int min, int max)
 {
@@ -35,44 +36,30 @@ void create_matrix(double **array, size_t nb_row, size_t nb_col, int k)
 
     int diago = 0;
     int other = 0;
-    int nb_zero = nb_row - k - 1;
     for (i = 0; i < nb_row; i++)
     {
-        int count_zero = 0;
-        int k2 = k;
-        for (j = 0; j < nb_col; j++)
-        {  
+        for(j = 0; j < nb_col; j++)
+        {
             if (i == j)
             {
                 array[i][j] = diagonal_value[diago];
                 diago++;
             }
-            else
-            {   
-                int zero = rand() % 2;
-                if (k2 > 0 && zero == 0)
-                {
-                    array[i][j] = other_values[other];
-                    other++;
-                    k2--;
-                }
-                else if (count_zero + 1 != nb_zero)
-                {
-                    array[i][j] = 0;
-                    count_zero++;
-                }
-                else if (k2 > 0)
-                {
-                    array[i][j] = other_values[other];
-                    other++;
-                    k2--;
-                }
-                else
-                {
-                    array[i][j] = 0;
-                }
+        }
+    }
+    for (i = 0; i < nb_row; i++)
+    {
+        int k2 = k - 1;
+        while (k2 > 0)
+        {
+            int random = rand() % (nb_col - 1);
+            while (array[i][random] != 0)
+            {
+                random = rand() % (nb_col - 1);
             }
-
+            array[i][random] = other_values[other];
+            other++;
+            k2--;
         }
     }
     free(diagonal_value);
@@ -86,14 +73,14 @@ void print_matrix(double **array, size_t nb_row, size_t nb_col)
     {
         for (j = 0; j < nb_col; j++)
         {
-            printf("array[%ld][%ld] = %lf ", i, j, array[i][j]);
+            printf("| %lf ", array[i][j]);
         }
-        printf("\n");
+        printf("|\n");
     }
 
 }
 
-void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size_t nb_row, size_t nb_col)
+void create_vector(double **array, double *val, int *col_ind, int *row_ptr, size_t nb_row, size_t nb_col)
 {
     size_t i, j;
     int new_line = 0;
@@ -111,7 +98,7 @@ void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size
                 val[size_val] = array[i][j];
                 if (new_line)
                 {
-                    raw_ptr[size_ptr] = size_val;
+                    row_ptr[size_ptr] = size_val;
                     size_ptr++;
                     new_line = 0;
                 }
@@ -121,19 +108,19 @@ void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size
             }
         }
     }
-    raw_ptr[size_ptr] = size_val;
+    row_ptr[size_ptr] = size_val;
     size_ptr++;
-    printf("raw_ptr: ");
+    printf("row_ptr: ");
     for (i = 0; i < size_ptr; i++)
     {
-        printf("| %d ", raw_ptr[i]);
+        printf("| %d ", row_ptr[i]);
     }
-    printf("\nval: ");
+    printf("\n\nval: ");
     for (i = 0; i < size_val; i++)
     {
         printf("| %lf ", val[i]);
     }
-    printf("\ncol_ind: ");
+    printf("\n\ncol_ind: ");
     for (i = 0; i < size_col; i++)
     {
         printf("| %d ", col_ind[i]);
@@ -142,20 +129,21 @@ void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size
 
 }
 
-void matrix_vector_product(double *result, double *x, double *val, int* col_ind, int* raw_ptr, size_t nb_row)
+void matrix_vector_product(double *result, double *x, double *val, int* col_ind, int* row_ptr, size_t nb_row)
 {
     size_t i;
     int j;
 
     for (i = 0; i < nb_row; i++)
     {
-        for (j = raw_ptr[i]; j < raw_ptr[i + 1] ; j++)
+        for (j = row_ptr[i]; j < row_ptr[i + 1] ; j++)
         {
             result[i] += val[j] * x[col_ind[j]];
         }
     }
     for (i = 0; i < nb_row; i++)
-        printf("result[%ld] = %lf\n", i, result[i]);
+        printf("| %lf ",result[i]);
+    printf("|\n");
 }
 
 void test_product(double **array, double* old_result, double *x, size_t nb_row, size_t nb_col)
@@ -170,17 +158,19 @@ void test_product(double **array, double* old_result, double *x, size_t nb_row, 
     for (i = 0; i < nb_row; i++)
     {
         if (result[i] != old_result[i])
-            printf("bad product\n");
+        {
+            errx(1, "bad product\n");
+        }
     }
     free(result);
 }
 
 void free_all(double **array, double *result, double *val, 
-        int *raw_ptr, int *col_ind, double *x, size_t nb_row)
+        int *row_ptr, int *col_ind, double *x, size_t nb_row)
 {
     free(val);
     free(col_ind);
-    free(raw_ptr);
+    free(row_ptr);
     free(x);
     free(result);
     for (size_t i = 0; i < nb_row; i++)
@@ -195,11 +185,14 @@ int main(void)
     int k;
     printf("Enter the desired matrix row numbers: ");
     scanf("%lu", &nb_row);
+    printf("\n");
     printf("Enter the desired matrix column numbers: ");
     scanf("%lu", &nb_col);
-    printf("matrix size: %lux%lu\n", nb_row, nb_col);
+    printf("\n");
+    printf("matrix size: %lux%lu\n\n", nb_row, nb_col);
     printf("How much non-zero elements in each row? ");
     scanf("%d", &k);
+    printf("\n");
 
     double **array = (double **) calloc(nb_row, sizeof(double *));
     for (i = 0; i < nb_row; i++)
@@ -209,26 +202,44 @@ int main(void)
 
     double *val = (double *) calloc(nb_row * nb_col, sizeof(double));
     int *col_ind = (int *) calloc(nb_row * nb_col, sizeof(int));
-    int *raw_ptr = (int *) calloc(nb_row + 1, sizeof(int));
+    int *row_ptr = (int *) calloc(nb_row + 1, sizeof(int));
     double *x;
     if (nb_row < nb_col)
     {
         x = (double *) calloc(nb_col, sizeof(double));
         gen_rand(x, nb_col, 1, 20);
+        printf("x: ");
+        for(i = 0; i < nb_col; i++)
+        {
+            printf("| %lf ", x[i]);
+        }
+        printf("|\n\n");
     }
     else
     {
         x = (double *) calloc(nb_row, sizeof(double));
         gen_rand(x, nb_row, 1, 20);
+        
+        printf("Here is the x vector: \n");
+        for(i = 0; i < nb_row; i++)
+        {
+            printf("| %lf ", x[i]);
+        }
+        printf("|\n\n");
     }
+
     double *result = (double *) calloc(nb_row, sizeof(double));
 
     create_matrix(array, nb_row, nb_col, k);
+    printf("Here is the sparse matrix generated: \n\n");
     print_matrix(array, nb_row, nb_col);
-    create_vector(array, val, col_ind, raw_ptr, nb_row, nb_col);
-    matrix_vector_product(result, x, val, col_ind, raw_ptr, nb_row);
+    printf("\n");
+    printf("Here are vectors generated with the matrix: \n\n");
+    create_vector(array, val, col_ind, row_ptr, nb_row, nb_col);
+    printf("\nHere is the result vector: \n\n");
+    matrix_vector_product(result, x, val, col_ind, row_ptr, nb_row);
     test_product(array, result, x, nb_row, nb_col);
-    free_all(array, result, val, raw_ptr, col_ind, x, nb_row);
-    sleep(10000);
+    free_all(array, result, val, row_ptr, col_ind, x, nb_row);
+    printf("\nThanks!\n");
     return 0;
 }
