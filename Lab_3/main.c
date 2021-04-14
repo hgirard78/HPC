@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 
-void gen_rand(double *array, size_t size, int min, int max)
+void gen_rand(double *vector, size_t size, int min, int max)
 {
 
     double r;
@@ -11,7 +11,7 @@ void gen_rand(double *array, size_t size, int min, int max)
     {
         r = (double) rand() / ((double) RAND_MAX + 1);
         r = r * (max - min) + min;
-        *(array + i) = r;
+        vector[i] = r;
     }
 }
 void create_matrix(double **array, size_t nb_row, size_t nb_col, int k)
@@ -19,14 +19,17 @@ void create_matrix(double **array, size_t nb_row, size_t nb_col, int k)
     size_t i, j;
     double *diagonal_value, *other_values;
     if (nb_row < nb_col)
+    {
         diagonal_value = malloc(nb_row * sizeof(double));
-
+        gen_rand(diagonal_value, nb_row, 1, 2);
+    }
     else
+    {
         diagonal_value = malloc(nb_col * sizeof(double));
-
+        gen_rand(diagonal_value, nb_col, 1, 2);
+    }
     other_values = malloc((nb_row * nb_col) * sizeof(double));
 
-    gen_rand(diagonal_value, nb_row, 1, 2);
     gen_rand(other_values, nb_row * nb_col, 0, 1);
 
     int diago = 0;
@@ -193,15 +196,6 @@ int main(void)
     scanf("%lu", &nb_row);
     printf("Enter the desired matrix column numbers: ");
     scanf("%lu", &nb_col);
-    while (nb_row != nb_col)
-    {
-        printf("The matrix has to be squared!\n");
-        printf("Enter the desired matrix row numbers: ");
-        scanf("%lu", &nb_row);
-        printf("Enter the desired matrix column numbers: ");
-        scanf("%lu", &nb_col);
-
-    }
     printf("matrix size: %lux%lu\n", nb_row, nb_col);
     printf("How much non-zero elements in each row? ");
     scanf("%d", &k);
@@ -215,8 +209,17 @@ int main(void)
     double *val = (double *) calloc(nb_row * nb_col, sizeof(double));
     int *col_ind = (int *) calloc(nb_row * nb_col, sizeof(int));
     int *raw_ptr = (int *) calloc(nb_row + 1, sizeof(int));
-    double *x = (double *) calloc(nb_row, sizeof(double));
-    gen_rand(x, nb_row, 1, 20);
+    double *x;
+    if (nb_row < nb_col)
+    {
+        x = (double *) calloc(nb_col, sizeof(double));
+        gen_rand(x, nb_col, 1, 20);
+    }
+    else
+    {
+        x = (double *) calloc(nb_row, sizeof(double));
+        gen_rand(x, nb_row, 1, 20);
+    }
     double *result = (double *) calloc(nb_row, sizeof(double));
 
     create_matrix(array, nb_row, nb_col, k);
