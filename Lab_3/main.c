@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include <string.h>
 
 void gen_rand(double *array, size_t size, int min, int max)
 {
@@ -138,16 +138,10 @@ void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size
 
 }
 
-void matrix_vector_product(double *val, int* col_ind, int* raw_ptr, size_t nb_row)
+void matrix_vector_product(double *result, double *x, double *val, int* col_ind, int* raw_ptr, size_t nb_row)
 {
     size_t i;
     int j;
-    double *result = (double *) calloc(nb_row, sizeof(double));
-    double *x = (double *) calloc(nb_row, sizeof(double));
-    gen_rand(x, nb_row, 1, 20);
-
-    for (i = 0; i < nb_row; i++)
-        result[i] = 0;
 
     for (i = 0; i < nb_row; i++)
     {
@@ -158,8 +152,36 @@ void matrix_vector_product(double *val, int* col_ind, int* raw_ptr, size_t nb_ro
     }
     for (i = 0; i < nb_row; i++)
         printf("result[%ld] = %lf\n", i, result[i]);
+}
+
+void test_product(double **array, double* old_result, double *x, size_t nb_row, size_t nb_col)
+{
+    size_t i, j;
+    double *result = (double *) calloc(nb_row, sizeof(double));
+    for(i = 0; i < nb_row; i++)
+    {
+        for(j = 0; j < nb_col; j++)
+            result[i] += array[i][j] * x[j];
+    }
+    for (i = 0; i < nb_row; i++)
+    {
+        if (result[i] != old_result[i])
+            printf("bad product\n");
+    }
+    free(result);
+}
+
+void free_all(double **array, double *result, double *val, 
+        int *raw_ptr, int *col_ind, double *x, size_t nb_row)
+{
+    free(val);
+    free(col_ind);
+    free(raw_ptr);
     free(x);
     free(result);
+    for (size_t i = 0; i < nb_row; i++)
+        free(array[i]);
+    free(array);
 }
 int main(void)
 {
@@ -171,6 +193,15 @@ int main(void)
     scanf("%lu", &nb_row);
     printf("Enter the desired matrix column numbers: ");
     scanf("%lu", &nb_col);
+    while (nb_row != nb_col)
+    {
+        printf("The matrix has to be squared!\n");
+        printf("Enter the desired matrix row numbers: ");
+        scanf("%lu", &nb_row);
+        printf("Enter the desired matrix column numbers: ");
+        scanf("%lu", &nb_col);
+
+    }
     printf("matrix size: %lux%lu\n", nb_row, nb_col);
     printf("How much non-zero elements in each row? ");
     scanf("%d", &k);
@@ -184,16 +215,15 @@ int main(void)
     double *val = (double *) calloc(nb_row * nb_col, sizeof(double));
     int *col_ind = (int *) calloc(nb_row * nb_col, sizeof(int));
     int *raw_ptr = (int *) calloc(nb_row + 1, sizeof(int));
+    double *x = (double *) calloc(nb_row, sizeof(double));
+    gen_rand(x, nb_row, 1, 20);
+    double *result = (double *) calloc(nb_row, sizeof(double));
 
     create_matrix(array, nb_row, nb_col, k);
     print_matrix(array, nb_row, nb_col);
     create_vector(array, val, col_ind, raw_ptr, nb_row, nb_col);
-    matrix_vector_product(val, col_ind, raw_ptr, nb_row);
-    free(val);
-    free(col_ind);
-    free(raw_ptr);
-    for (i = 0; i < nb_row; i++)
-        free(array[i]);
-    free(array);
+    matrix_vector_product(result, x, val, col_ind, raw_ptr, nb_row);
+    test_product(array, result, x, nb_row, nb_col);
+    free_all(array, result, val, raw_ptr, col_ind, x, nb_row);
     return 0;
 }
