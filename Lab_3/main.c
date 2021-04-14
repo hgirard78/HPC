@@ -137,13 +137,36 @@ void create_vector(double **array, double *val, int *col_ind, int *raw_ptr, size
     printf("\n");
 
 }
+
+void matrix_vector_product(double *val, int* col_ind, int* raw_ptr, size_t nb_row)
+{
+    size_t i;
+    int j;
+    double *result = (double *) calloc(nb_row, sizeof(double));
+    double *x = (double *) calloc(nb_row, sizeof(double));
+    gen_rand(x, nb_row, 1, 20);
+
+    for (i = 0; i < nb_row; i++)
+        result[i] = 0;
+
+    for (i = 0; i < nb_row; i++)
+    {
+        for (j = raw_ptr[i]; j < raw_ptr[i + 1] ; j++)
+        {
+            result[i] += val[j] * x[col_ind[j]];
+        }
+    }
+    for (i = 0; i < nb_row; i++)
+        printf("result[%ld] = %lf\n", i, result[i]);
+    free(x);
+    free(result);
+}
 int main(void)
 {
 
     srand(time(NULL));
     size_t nb_row, nb_col, i;
     int k;
-    int j;
     printf("Enter the desired matrix row numbers: ");
     scanf("%lu", &nb_row);
     printf("Enter the desired matrix column numbers: ");
@@ -161,24 +184,16 @@ int main(void)
     double *val = (double *) calloc(nb_row * nb_col, sizeof(double));
     int *col_ind = (int *) calloc(nb_row * nb_col, sizeof(int));
     int *raw_ptr = (int *) calloc(nb_row + 1, sizeof(int));
+
     create_matrix(array, nb_row, nb_col, k);
     print_matrix(array, nb_row, nb_col);
     create_vector(array, val, col_ind, raw_ptr, nb_row, nb_col);
-    double *result = (double *) calloc(nb_row, sizeof(double));
-    double *x = (double *) calloc(nb_row * nb_col, sizeof(double));
-    for (i = 0; i < nb_row * nb_col; i++)
-    {
-        x[i] = 1;
-    }
+    matrix_vector_product(val, col_ind, raw_ptr, nb_row);
+    free(val);
+    free(col_ind);
+    free(raw_ptr);
     for (i = 0; i < nb_row; i++)
-    {
-        result[i] = 0;
-        for (j = raw_ptr[i]; j < (raw_ptr[i] - 1);)
-        {
-            result[i] += val[j] * x[col_ind[j]];
-        }
-    }
-    for (i = 0; i < nb_row; i++)
-        printf("result[%ld] = %lf\n", i, result[i]);
+        free(array[i]);
+    free(array);
     return 0;
 }
