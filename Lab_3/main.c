@@ -238,8 +238,9 @@ int main(void)
     create_vector(array, val, col_ind, row_ptr, nb_row, nb_col);
     printf("\nHere is the result vector: \n\n");
     matrix_vector_product(result, x, val, col_ind, row_ptr, nb_row);
+    printf("\nTesting results...\n");
     test_product(array, result, x, nb_row, nb_col);
     free_all(array, result, val, row_ptr, col_ind, x, nb_row);
-    printf("\nThanks!\n");
+    printf("\nEverything is ok!\n");
     return 0;
 }
