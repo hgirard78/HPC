@@ -2,7 +2,7 @@ CCOMP = gcc
 
 LOADER = gcc
 
-OPT = -DDP -DROLL -O3
+OPT = -DSP -DUNROLL -O3
 
 LIB = -lm -lrt
 
