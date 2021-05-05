@@ -5,7 +5,7 @@ opt O3: 0.182932 6 access to variable
 
 with optimization:
 
-opt O0: 0.086622
+opt O0: 0.086622 40 access
 opt O1: 0.027044
 opt O2: 0.025683
 opt O3: 0.023126
