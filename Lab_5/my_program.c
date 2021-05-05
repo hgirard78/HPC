@@ -7,6 +7,7 @@
 #define SIZE 25000000
 
 void mat_vec(double* a, double* x, double* y, int n);
+void mat_vec1(double* a, double* x, double* y, int n);
 
 int main ()
 {
@@ -25,7 +26,7 @@ int main ()
   printf("start\n");
   
   tstart();
-  mat_vec(a,x,y,n);
+  mat_vec1(a,x,y,n);
   t=tstop();
   printf("end\n");
   printf("Time: %lf\n",t);

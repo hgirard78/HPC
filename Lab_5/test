@@ -1,5 +1,11 @@
-opt O0: 0.181095
-opt O1: 0.185540
-opt O2: 0.182655
-opt O3: 0.182932
+opt O0: 0.181095 33 access to variable 
+opt O1: 0.185540 7 access to variable 
+opt O2: 0.182655 6 access to variable 
+opt O3: 0.182932 6 access to variable 
 
+with optimization:
+
+opt O0: 0.086622
+opt O1: 0.027044
+opt O2: 0.025683
+opt O3: 0.023126
