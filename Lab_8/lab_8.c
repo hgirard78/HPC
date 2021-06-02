@@ -54,7 +54,7 @@ int main(void)
     start=omp_get_wtime();
 
     //fragment for paralelization
-#pragma omp parallel shared(A, B, C) private(i, j, k, sum)
+#pragma omp parallel for reduction(+:sum) private(j) private(k) 
 
     for (i = 0; i < N; i++) 
     {
